@@ -2,20 +2,26 @@
 using Microsoft.Maui.Controls;
 using TarkKoduKK.Data;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Maui.Graphics;
 
 namespace TarkKoduKK
 {
     public partial class MatrixPage : ContentPage
     {
         private IMqttClient mqttClient;
-
         private const int MatrixSize = 16;
         private const int CellSize = 20;
         private bool isDrawing = false;
         private MatrixDrawable drawable;
+        private Color currentColor = Colors.Red;
+
+        private readonly ConcurrentQueue<string> messageQueue = new();
+        private readonly HashSet<string> sentRecently = new();
+        private CancellationTokenSource publishLoopCts;
 
         public MatrixPage()
         {
@@ -25,19 +31,15 @@ namespace TarkKoduKK
 
             drawable = new MatrixDrawable();
             MatrixCanvas.Drawable = drawable;
+            MatrixCanvas.Invalidate();
 
-            var touchGesture = new TouchGestureRecognizer();
-            touchGesture.TouchPressed += CanvasPressed;
-            touchGesture.TouchReleased += CanvasReleased;
-            touchGesture.TouchMoved += CanvasDragged;
-
-            MatrixCanvas.GestureRecognizers.Add(touchGesture);
+            StartPublishLoop();
         }
 
         private void InitializeMqttClient()
         {
             var mqttFactory = new MqttClientFactory();
-            mqttClient = mqttFactory.CreateMqttClient(); ;
+            mqttClient = mqttFactory.CreateMqttClient();
         }
 
         private async Task ConnectToBroker()
@@ -56,6 +58,7 @@ namespace TarkKoduKK
             try
             {
                 await mqttClient.ConnectAsync(options, CancellationToken.None);
+                ConnectionStatus.Text = "Подключено ✅";
             }
             catch (Exception ex)
             {
@@ -63,70 +66,116 @@ namespace TarkKoduKK
             }
         }
 
-        private async Task PublishMessage(string message)
+        private void OnCanvasTapped(object sender, EventArgs e)
         {
-            if (mqttClient == null || !mqttClient.IsConnected) return;
+            var position = e as TappedEventArgs;
+            var touchPoint = position?.GetPosition(MatrixCanvas); 
 
-            try
+            if (touchPoint.HasValue) 
             {
-                ConnectionStatus.Text = $"Сообщение: {message}";
-                var msg = new MqttApplicationMessageBuilder()
-                    .WithTopic(MqttBroker.Topic)
-                    .WithPayload(message)
-                    .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
-                    .Build();
-
-                await mqttClient.PublishAsync(msg, CancellationToken.None);
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Ошибка", $"Не удалось отправить сообщение: {ex.Message}", "OK");
+                double xPos = touchPoint.Value.X;  
+                double yPos = touchPoint.Value.Y;  
+                DrawCanvas(xPos, yPos);
             }
         }
 
-        private void CanvasPressed(object sender, PointerEventArgs e)
+        private void OnCanvasPanUpdated(object sender, PanUpdatedEventArgs e)
         {
-            isDrawing = true;
-            DrawCanvas(e);
+            if (e.StatusType == GestureStatus.Started)
+            {
+                isDrawing = true;
+            }
+            if (e.StatusType == GestureStatus.Running && isDrawing)
+            {
+                DrawCanvas(e.TotalX, e.TotalY);
+            }
+            if (e.StatusType == GestureStatus.Completed || e.StatusType == GestureStatus.Canceled)
+            {
+                isDrawing = false;
+            }
         }
 
-        private void CanvasReleased(object sender, PointerEventArgs e)
+        private void DrawCanvas(double xPos, double yPos)
         {
-            isDrawing = false;
-        }
-
-        private async void CanvasDragged(object sender, PointerEventArgs e)
-        {
-            if (!isDrawing) return;
-            DrawCanvas(e);
-        }
-        private async void DrawCanvas(PointerEventArgs e)
-        {
-            var position = e.GetPosition(MatrixCanvas);
-            if (position == null) return;
-
-            int x = (int)Math.Round(position.Value.X / CellSize);
-            int y = (int)Math.Round(position.Value.Y / CellSize);
+            int x = (int)Math.Floor(xPos / CellSize);
+            int y = (int)Math.Floor(yPos / CellSize);
 
             if (x >= 0 && x < MatrixSize && y >= 0 && y < MatrixSize)
             {
-                var color = Colors.Red;
-                drawable.DrawPixel(x, y, color);
+                drawable.DrawPixel(x, y, currentColor);
                 MatrixCanvas.Invalidate();
 
-                int r = (int)(color.Red * 255);
-                int g = (int)(color.Green * 255);
-                int b = (int)(color.Blue * 255);
+                int r = (int)(currentColor.Red * 255);
+                int g = (int)(currentColor.Green * 255);
+                int b = (int)(currentColor.Blue * 255);
 
                 string message = $"{x},{y},{r},{g},{b}";
-                await PublishMessage(message);
+                EnqueueMessage(message);
             }
         }
 
+        private void EnqueueMessage(string message)
+        {
+            if (sentRecently.Contains(message)) return;
+
+            messageQueue.Enqueue(message);
+            sentRecently.Add(message);
+
+            _ = Task.Delay(500).ContinueWith(_ => sentRecently.Remove(message));
+        }
+
+        private void StartPublishLoop()
+        {
+            publishLoopCts = new CancellationTokenSource();
+            var token = publishLoopCts.Token;
+
+            Task.Run(async () =>
+            {
+                while (!token.IsCancellationRequested)
+                {
+                    int maxPerCycle = 10;
+                    int sentCount = 0;
+
+                    while (sentCount < maxPerCycle && messageQueue.TryDequeue(out string message))
+                    {
+                        if (mqttClient != null && mqttClient.IsConnected)
+                        {
+                            try
+                            {
+                                var msg = new MqttApplicationMessageBuilder()
+                                    .WithTopic(MqttBroker.Topic)
+                                    .WithPayload(message)
+                                    .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
+                                    .Build();
+
+                                await mqttClient.PublishAsync(msg, CancellationToken.None);
+                                sentCount++;
+                            }
+                            catch
+                            {
+                            }
+                        }
+                    }
+
+                    await Task.Delay(2);
+                }
+            }, token);
+        }
+
+        private void OnColorButtonClicked(object sender, EventArgs e)
+        {
+            if (sender is Button button)
+            {
+                currentColor = button.BackgroundColor;
+                ConnectionStatus.Text = $"Выбран цвет";
+            }
+        }
 
         protected override async void OnDisappearing()
         {
             base.OnDisappearing();
+            publishLoopCts?.Cancel();
+
             if (mqttClient.IsConnected)
             {
                 await mqttClient.DisconnectAsync();
