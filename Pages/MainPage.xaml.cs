@@ -32,7 +32,7 @@ namespace TarkKoduKK
 
             if (mqttClient.IsConnected)
             {
-                await PublishMessage("1,15,255,0,0");
+                await PublishMessage("1,15,255,0,0", MqttBroker.TopicDrow);
             }
             else
             {
@@ -62,12 +62,12 @@ namespace TarkKoduKK
             }
         }
 
-        private async Task PublishMessage(string message)
+        private async Task PublishMessage(string message, string Topic)
         {
             try
             {
                 var msg = new MqttApplicationMessageBuilder()
-                    .WithTopic(MqttBroker.Topic)
+                    .WithTopic(Topic)
                     .WithPayload(message)
                     .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
                     .Build();

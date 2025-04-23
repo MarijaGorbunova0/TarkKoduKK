@@ -10,7 +10,8 @@ namespace TarkKoduKK.Data
     {
         public const string Broker = "b2255a4c0cd74f57a5ca3f557f9867a6.s1.eu.hivemq.cloud";
         public const int Port = 8883;
-        public const string Topic = "Matrix/drow";
+        public const string TopicDrow = "Matrix/drow";
+        public const string TopicCommands = "Matrix/commands";  
         public const string Username = "test1";
         public const string Password = "Test12345678";
     }

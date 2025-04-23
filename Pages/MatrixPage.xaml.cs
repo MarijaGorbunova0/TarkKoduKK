@@ -1,97 +1,102 @@
 ﻿using MQTTnet;
 using Microsoft.Maui.Controls;
-using TarkKoduKK.Data;
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Maui.Graphics;
-
+using TarkKoduKK.Data;
 namespace TarkKoduKK
 {
     public partial class MatrixPage : ContentPage
     {
-        private IMqttClient mqttClient;
         private const int MatrixSize = 16;
         private const int CellSize = 20;
+
         private bool isDrawing = false;
         private MatrixDrawable drawable;
         private Color currentColor = Colors.Red;
 
-        private readonly ConcurrentQueue<string> messageQueue = new();
-        private readonly HashSet<string> sentRecently = new();
-        private CancellationTokenSource publishLoopCts;
+        private Point? panStartAbsolute;
+        private (int x, int y, Color color)? lastSentPixel = null;
+
+        private IMqttClient mqttClient;
 
         public MatrixPage()
         {
             InitializeComponent();
-            InitializeMqttClient();
-            _ = ConnectToBroker();
-
+            InitializeMqttClient(); 
             drawable = new MatrixDrawable();
             MatrixCanvas.Drawable = drawable;
             MatrixCanvas.Invalidate();
-
-            StartPublishLoop();
         }
 
         private void InitializeMqttClient()
         {
             var mqttFactory = new MqttClientFactory();
             mqttClient = mqttFactory.CreateMqttClient();
+            ConnectToBroker(); 
         }
 
-        private async Task ConnectToBroker()
+        private async void ConnectToBroker()
         {
             var options = new MqttClientOptionsBuilder()
-                .WithTcpServer(MqttBroker.Broker, MqttBroker.Port)
-                .WithCredentials(MqttBroker.Username, MqttBroker.Password)
-                .WithTlsOptions(new MqttClientTlsOptions
-                {
-                    UseTls = true,
-                    IgnoreCertificateRevocationErrors = true,
-                    AllowUntrustedCertificates = true
-                })
-                .Build();
+                    .WithTcpServer(MqttBroker.Broker, MqttBroker.Port)
+                    .WithCredentials(MqttBroker.Username, MqttBroker.Password)
+                    .WithTlsOptions(new MqttClientTlsOptions
+                    {
+                        UseTls = true,
+                        IgnoreCertificateRevocationErrors = true,
+                        AllowUntrustedCertificates = true
+                    })
+                    .Build();
 
             try
             {
-                await mqttClient.ConnectAsync(options, CancellationToken.None);
-                ConnectionStatus.Text = "Подключено ✅";
+                await mqttClient.ConnectAsync(options);
+                Console.WriteLine("Connected to MQTT Broker");
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Ошибка", $"Не удалось подключиться: {ex.Message}", "OK");
+                Console.WriteLine($"Failed to connect to broker: {ex.Message}");
             }
         }
 
         private void OnCanvasTapped(object sender, EventArgs e)
         {
-            var position = e as TappedEventArgs;
-            var touchPoint = position?.GetPosition(MatrixCanvas); 
-
-            if (touchPoint.HasValue) 
+            if (e is TappedEventArgs tap)
             {
-                double xPos = touchPoint.Value.X;  
-                double yPos = touchPoint.Value.Y;  
-                DrawCanvas(xPos, yPos);
+                var touchPoint = tap.GetPosition(MatrixCanvas);
+
+                if (touchPoint.HasValue)
+                {
+                    panStartAbsolute = touchPoint.Value;
+                    DrawCanvas(touchPoint.Value.X, touchPoint.Value.Y);
+                }
             }
         }
 
         private void OnCanvasPanUpdated(object sender, PanUpdatedEventArgs e)
         {
-            if (e.StatusType == GestureStatus.Started)
+            switch (e.StatusType)
             {
-                isDrawing = true;
-            }
-            if (e.StatusType == GestureStatus.Running && isDrawing)
-            {
-                DrawCanvas(e.TotalX, e.TotalY);
-            }
-            if (e.StatusType == GestureStatus.Completed || e.StatusType == GestureStatus.Canceled)
-            {
-                isDrawing = false;
+                case GestureStatus.Started:
+                    isDrawing = true;
+                    break;
+
+                case GestureStatus.Running when isDrawing:
+                    if (panStartAbsolute is Point start)
+                    {
+                        double x = start.X + e.TotalX;
+                        double y = start.Y + e.TotalY;
+                        DrawCanvas(x, y);
+                    }
+                    break;
+
+                case GestureStatus.Completed:
+                case GestureStatus.Canceled:
+                    isDrawing = false;
+                    panStartAbsolute = null;
+                    break;
             }
         }
 
@@ -102,64 +107,44 @@ namespace TarkKoduKK
 
             if (x >= 0 && x < MatrixSize && y >= 0 && y < MatrixSize)
             {
-                drawable.DrawPixel(x, y, currentColor);
-                MatrixCanvas.Invalidate();
+                var current = (x, y, currentColor);
 
-                int r = (int)(currentColor.Red * 255);
-                int g = (int)(currentColor.Green * 255);
-                int b = (int)(currentColor.Blue * 255);
+                if (lastSentPixel != current)
+                {
+                    drawable.DrawPixel(x, y, currentColor);
+                    MatrixCanvas.Invalidate();
+                    lastSentPixel = current;
 
-                string message = $"{x},{y},{r},{g},{b}";
-                EnqueueMessage(message);
+                    string selectedTopic = "Matrix/drow";
+
+                    SendToBroker(x, y, currentColor, selectedTopic);
+                }
             }
         }
 
-        private void EnqueueMessage(string message)
+        private async void SendToBroker(int x, int y, Color color, string topic)
         {
-            if (sentRecently.Contains(message)) return;
-
-            messageQueue.Enqueue(message);
-            sentRecently.Add(message);
-
-            _ = Task.Delay(500).ContinueWith(_ => sentRecently.Remove(message));
+            var message = $"{x},{y},{(int)(color.Red * 255)},{(int)(color.Green * 255)},{(int)(color.Blue * 255)}";
+            await PublishMessage(message, topic);
         }
 
-        private void StartPublishLoop()
+        private async Task PublishMessage(string message, string topic)
         {
-            publishLoopCts = new CancellationTokenSource();
-            var token = publishLoopCts.Token;
-
-            Task.Run(async () =>
+            try
             {
-                while (!token.IsCancellationRequested)
-                {
-                    int maxPerCycle = 10;
-                    int sentCount = 0;
+                var mqttMessage = new MqttApplicationMessageBuilder()
+                    .WithTopic(topic) 
+                    .WithPayload(message)
+                    .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
+                    .Build();
 
-                    while (sentCount < maxPerCycle && messageQueue.TryDequeue(out string message))
-                    {
-                        if (mqttClient != null && mqttClient.IsConnected)
-                        {
-                            try
-                            {
-                                var msg = new MqttApplicationMessageBuilder()
-                                    .WithTopic(MqttBroker.Topic)
-                                    .WithPayload(message)
-                                    .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
-                                    .Build();
-
-                                await mqttClient.PublishAsync(msg, CancellationToken.None);
-                                sentCount++;
-                            }
-                            catch
-                            {
-                            }
-                        }
-                    }
-
-                    await Task.Delay(2);
-                }
-            }, token);
+                await mqttClient.PublishAsync(mqttMessage);
+                Console.WriteLine($"Message sent to topic {topic}: {message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending message: {ex.Message}");
+            }
         }
 
         private void OnColorButtonClicked(object sender, EventArgs e)
@@ -167,19 +152,14 @@ namespace TarkKoduKK
             if (sender is Button button)
             {
                 currentColor = button.BackgroundColor;
-                ConnectionStatus.Text = $"Выбран цвет";
             }
         }
 
-        protected override async void OnDisappearing()
+        private void ClearCanvas(object sender, EventArgs e)
         {
-            base.OnDisappearing();
-            publishLoopCts?.Cancel();
-
-            if (mqttClient.IsConnected)
-            {
-                await mqttClient.DisconnectAsync();
-            }
+            drawable = new MatrixDrawable();
+            MatrixCanvas.Drawable = drawable;
+            MatrixCanvas.Invalidate();
         }
     }
 
@@ -191,6 +171,7 @@ namespace TarkKoduKK
         {
             canvas.FillColor = Colors.Black;
             canvas.FillRectangle(dirtyRect);
+
             canvas.StrokeColor = Colors.Gray;
             canvas.StrokeSize = 1;
 

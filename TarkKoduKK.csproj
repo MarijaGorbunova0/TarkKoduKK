@@ -33,7 +33,8 @@
 
 	<!-- XAML-страницы и C#-код -->
 	<ItemGroup>
-
+	  <None Remove="Resources\Images\clear_icon.png" />
+	  <None Remove="Resources\Images\fill_icon.png" />
 	</ItemGroup>
 
 	<!-- NuGet-пакеты -->
