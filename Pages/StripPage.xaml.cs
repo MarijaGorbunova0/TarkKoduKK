@@ -115,6 +115,13 @@ namespace TarkKoduKK
                 await Navigation.PushAsync(targetPage);
             }
         }
+        private void OnColorButtonClicked(object sender, EventArgs e)
+        {
+            if (sender is Button colorButton)
+            {
+                ColorCircle.BackgroundColor = colorButton.BackgroundColor;
+            }
+        }
     }
 
 }

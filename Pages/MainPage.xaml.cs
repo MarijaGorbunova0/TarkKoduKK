@@ -104,8 +104,9 @@ namespace TarkKoduKK
 
             Page targetPage = pageName switch
             {
-                "Главная" => new MainPage(),
-                "Настройки" => new MatrixPage(),
+                "Test connection" => new MainPage(),
+                "Matrix" => new MatrixPage(),
+                "Strip" => new StripPage(),
                 _ => null
             };
 

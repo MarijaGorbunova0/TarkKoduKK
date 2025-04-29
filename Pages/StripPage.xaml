@@ -4,7 +4,6 @@
              x:Class="TarkKoduKK.StripPage">
 
     <Grid>
-        <!-- Изображение в левом верхнем углу -->
         <Image Source="wifi.png"
            HeightRequest="50"
            Aspect="AspectFit"
@@ -19,7 +18,6 @@
                 VerticalOptions="Start" 
                 Margin="10"/>
 
-        <!-- Выпадающее меню - используем x:Name вместо Name -->
         <Frame x:Name="DropdownMenu"
                IsVisible="False"
                BackgroundColor="Transparent"
@@ -34,20 +32,40 @@
             </VerticalStackLayout>
         </Frame>
 
-        <!-- Кнопка -->
-        <VerticalStackLayout Padding="0"
-                         HorizontalOptions="Center"
-                         VerticalOptions="Center">
+        <VerticalStackLayout HorizontalOptions="Center"
+                             VerticalOptions="Center"
+                             Spacing="20">
 
-            <Image Source="wifi.png" 
-                   HeightRequest="150"
+            <Frame x:Name="ColorCircle"
                    WidthRequest="150"
-              
-       />
-            <Button Text="Отправить сообщение"
-                Clicked="OnSendMessageClicked" 
-                    />
+                   HeightRequest="150"
+                   CornerRadius="75"
+                   BackgroundColor="White"
+                   BorderColor="Gray"
+                   HasShadow="False" />
+            
+            <Grid ColumnSpacing="5"
+                  RowSpacing="5"
+                  Padding="10"
+                  HorizontalOptions="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="40"/>
+                    <ColumnDefinition Width="40"/>
+                    <ColumnDefinition Width="40"/>
+                    <ColumnDefinition Width="40"/>
+                    <ColumnDefinition Width="40"/>
+                    <ColumnDefinition Width="40"/>
+                    <ColumnDefinition Width="40"/>
+                </Grid.ColumnDefinitions>
 
+                <Button Grid.Column="0" BackgroundColor="Red" Clicked="OnColorButtonClicked"/>
+                <Button Grid.Column="1" BackgroundColor="Orange" Clicked="OnColorButtonClicked"/>
+                <Button Grid.Column="2" BackgroundColor="Yellow" Clicked="OnColorButtonClicked"/>
+                <Button Grid.Column="3" BackgroundColor="Green" Clicked="OnColorButtonClicked"/>
+                <Button Grid.Column="4" BackgroundColor="LightBlue" Clicked="OnColorButtonClicked"/>
+                <Button Grid.Column="5" BackgroundColor="Blue" Clicked="OnColorButtonClicked"/>
+                <Button Grid.Column="6" BackgroundColor="Purple" Clicked="OnColorButtonClicked"/>
+            </Grid>
         </VerticalStackLayout>
     </Grid>
 
