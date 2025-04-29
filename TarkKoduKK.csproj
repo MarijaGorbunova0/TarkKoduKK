@@ -45,5 +45,15 @@
 		<PackageReference Include="MQTTnet" Version="5.0.1.1416" />
 		<PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="4.3.7.1207" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Compile Update="Pages\StripPage.xaml.cs">
+	    <DependentUpon>StripPage.xaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+	<ItemGroup>
+	  <MauiXaml Update="Pages\StripPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	</ItemGroup>
 
 </Project>

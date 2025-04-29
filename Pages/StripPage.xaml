@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="TarkKoduKK.StripPage">
+
+    <Grid>
+        <!-- Изображение в левом верхнем углу -->
+        <Image Source="wifi.png"
+           HeightRequest="50"
+           Aspect="AspectFit"
+           HorizontalOptions="Start"
+           VerticalOptions="Start" 
+           Margin=" 20, 0, 0, 0" 
+               />
+        <Button x:Name="MenuButton"
+                Text="☰ Меню"
+                Clicked="OnMenuButtonClicked"
+                HorizontalOptions="End"
+                VerticalOptions="Start" 
+                Margin="10"/>
+
+        <!-- Выпадающее меню - используем x:Name вместо Name -->
+        <Frame x:Name="DropdownMenu"
+               IsVisible="False"
+               BackgroundColor="Transparent"
+               BorderColor="Transparent"
+               Padding="0"
+               Margin="10,50,0,0"
+               HorizontalOptions="End">
+            <VerticalStackLayout>
+                <Button Text="Test connection" Clicked="OnMenuItemClicked"/>
+                <Button Text="Matrix" Clicked="OnMenuItemClicked"/>
+                <Button Text="Strip" Clicked="OnMenuItemClicked"/>
+            </VerticalStackLayout>
+        </Frame>
+
+        <!-- Кнопка -->
+        <VerticalStackLayout Padding="0"
+                         HorizontalOptions="Center"
+                         VerticalOptions="Center">
+
+            <Image Source="wifi.png" 
+                   HeightRequest="150"
+                   WidthRequest="150"
+              
+       />
+            <Button Text="Отправить сообщение"
+                Clicked="OnSendMessageClicked" 
+                    />
+
+        </VerticalStackLayout>
+    </Grid>
+
+</ContentPage>
