@@ -1,51 +1,70 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="TarkKoduKK.MainPage">
 
-    <Grid>
-        <Image Source="wifi.png"
-           HeightRequest="50"
-           Aspect="AspectFit"
-           HorizontalOptions="Start"
-           VerticalOptions="Start" 
-           Margin=" 20, 0, 0, 0" 
-               />
+    <Grid RowDefinitions="Auto,Auto,*" ColumnDefinitions="*,*">
+        <Image Source="home_icon.png"
+               Grid.Row="0" Grid.Column="0" 
+               HeightRequest="50"
+               Aspect="AspectFit"
+               HorizontalOptions="Start"
+               VerticalOptions="Center"
+               Margin="20,10"/>
+
         <Button x:Name="MenuButton"
-                Text="☰ Меню"
+                Grid.Row="0" Grid.Column="1"
+                BackgroundColor="#474747"
+                Text="☰"
                 Clicked="OnMenuButtonClicked"
                 HorizontalOptions="End"
-                VerticalOptions="Start" 
-                Margin="10"/>
+                VerticalOptions="Center"
+                Margin="0,0,20,0"/>
+
+        <Frame CornerRadius="20"       
+               Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+               BackgroundColor="#dc70e5"
+               Padding="15"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"
+               WidthRequest="160"
+               HeightRequest="51">
+            <Label Text="Testi ühendus"
+                   TextColor="white"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"/>
+        </Frame>
+
+        <VerticalStackLayout Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                             HorizontalOptions="Center"
+                             VerticalOptions="Center"
+                             Spacing="20">
+            <Image Source="wifi.png" 
+                   HeightRequest="150"
+                   WidthRequest="150"/>
+
+            <Button Text="TEST"
+                    TextColor="White"
+                    BackgroundColor="#dc70e5"
+                    Clicked="OnSendMessageClicked"/>
+        </VerticalStackLayout>
 
         <Frame x:Name="DropdownMenu"
+               Grid.Row="0" Grid.RowSpan="3" Grid.Column="1"
                IsVisible="False"
-               BackgroundColor="Transparent"
-               BorderColor="Transparent"
-               Padding="0"
-               Margin="10,50,0,0"
-               HorizontalOptions="End">
+               BackgroundColor="#333333"
+               CornerRadius="10"
+               Padding="10"
+               Margin="0,50,20,0"
+               ZIndex="999"
+               HorizontalOptions="End"
+               VerticalOptions="Start">
             <VerticalStackLayout>
-                <Button Text="Главная" Clicked="OnMenuItemClicked"/>
-                <Button Text="Настройки" Clicked="OnMenuItemClicked"/>
+                <Button Text="Test connection" Clicked="OnMenuItemClicked"/>
+                <Button Text="Matrix" Clicked="OnMenuItemClicked"/>
                 <Button Text="Strip" Clicked="OnMenuItemClicked"/>
             </VerticalStackLayout>
         </Frame>
-
-        <VerticalStackLayout Padding="0"
-                  HorizontalOptions="Center"
-                  VerticalOptions="Center">
-
-            <Image Source="wifi.png" 
-            HeightRequest="150"
-            WidthRequest="150"
-       
-/>
-            <Button Text="Отправить сообщение"
-         Clicked="OnSendMessageClicked" 
-             />
-
-        </VerticalStackLayout>
     </Grid>
-
 </ContentPage>

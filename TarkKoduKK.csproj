@@ -35,6 +35,8 @@
 	<ItemGroup>
 	  <None Remove="Resources\Images\clear_icon.png" />
 	  <None Remove="Resources\Images\fill_icon.png" />
+	  <None Remove="Resources\Images\home_icon.png" />
+	  <None Remove="Resources\Images\led_strip_img.png" />
 	</ItemGroup>
 
 	<!-- NuGet-пакеты -->

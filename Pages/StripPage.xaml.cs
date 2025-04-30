@@ -74,7 +74,6 @@ namespace TarkKoduKK
                     .Build();
 
                 await mqttClient.PublishAsync(msg, CancellationToken.None);
-                await DisplayAlert("Успех", "Сообщение отправлено!", "OK");
             }
             catch (Exception ex)
             {
@@ -90,6 +89,7 @@ namespace TarkKoduKK
                 await mqttClient.DisconnectAsync();
             }
         }
+        //--------------------------------------------------------------
         private void OnMenuButtonClicked(object sender, EventArgs e)
         {
             DropdownMenu.IsVisible = !DropdownMenu.IsVisible;
@@ -115,13 +115,36 @@ namespace TarkKoduKK
                 await Navigation.PushAsync(targetPage);
             }
         }
-        private void OnColorButtonClicked(object sender, EventArgs e)
+        private async void OnColorButtonClicked(object sender, EventArgs e)
         {
             if (sender is Button colorButton)
             {
-                ColorCircle.BackgroundColor = colorButton.BackgroundColor;
+                ColorCircle.Fill = new SolidColorBrush(colorButton.BackgroundColor);
+                string message = GetRgbString(colorButton.BackgroundColor);
+
+                if (!mqttClient.IsConnected)
+                {
+                    await ConnectToBroker();
+                }
+
+                if (mqttClient.IsConnected)
+                {
+                    await PublishMessage(message, MqttBroker.TopicStripColor);
+                }
+                else
+                {
+                    await DisplayAlert("Ошибка", "Не удалось подключиться к брокеру", "OK");
+                }
             }
         }
+        private string GetRgbString(Color color)
+        {
+            int r = (int)(color.Red * 255);
+            int g = (int)(color.Green * 255);
+            int b = (int)(color.Blue * 255);
+            return $"{r},{g},{b}";
+        }
+    
     }
 
 }
