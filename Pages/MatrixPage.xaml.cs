@@ -115,7 +115,7 @@ namespace TarkKoduKK
                     MatrixCanvas.Invalidate();
                     lastSentPixel = current;
 
-                    string selectedTopic = "Matrix/drow";
+                    string selectedTopic = MqttBroker.TopicDraw;
 
                     SendToBroker(x, y, currentColor, selectedTopic);
                 }
@@ -161,6 +161,44 @@ namespace TarkKoduKK
             MatrixCanvas.Drawable = drawable;
             MatrixCanvas.Invalidate();
         }
+        private void FillCanvas(object sender, EventArgs e)
+        {
+            for (int x = 0; x < MatrixSize; x++)
+            {
+                for (int y = 0; y < MatrixSize; y++)
+                {
+                    drawable.DrawPixel(x, y, currentColor);
+                }
+            }        
+            MatrixCanvas.Invalidate();
+            PublishMessage("Fill" + currentColor, MqttBroker.TopicCommands);
+        }
+        private void OnMenuButtonClicked(object sender, EventArgs e)
+        {
+            DropdownMenu.IsVisible = !DropdownMenu.IsVisible;
+        }
+
+        private async void OnMenuItemClicked(object sender, EventArgs e)
+        {
+            var button = (Button)sender;
+            string pageName = button.Text;
+
+            DropdownMenu.IsVisible = false;
+
+            Page targetPage = pageName switch
+            {
+                "Test connection" => new MainPage(),
+                "Matrix" => new MatrixPage(),
+                "Strip" => new StripPage(),
+                _ => null
+            };
+
+            if (targetPage != null && Navigation.NavigationStack.LastOrDefault()?.GetType() != targetPage.GetType())
+            {
+                await Navigation.PushAsync(targetPage);
+            }
+        }
+
     }
 
     public class MatrixDrawable : IDrawable
@@ -193,5 +231,6 @@ namespace TarkKoduKK
         {
             pixels[(x, y)] = color;
         }
+      
     }
 }

@@ -2,68 +2,45 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="TarkKoduKK.MatrixPage"
-             Title="LED Matrix Controller
-             ">
+             Title="LED Matrix Controller">
 
-    <VerticalStackLayout>
-        <GraphicsView x:Name="MatrixCanvas"
-              HeightRequest="320"
-              WidthRequest="320"
-              BackgroundColor="Black"
-               >
-            <GraphicsView.GestureRecognizers>
-                <TapGestureRecognizer Tapped="OnCanvasTapped" />
-                <PanGestureRecognizer PanUpdated="OnCanvasPanUpdated" />
-            </GraphicsView.GestureRecognizers>
-        </GraphicsView>
+    <Grid RowDefinitions="Auto,*,Auto,Auto"
+          ColumnDefinitions="*"
+          HorizontalOptions="FillAndExpand"
+          VerticalOptions="FillAndExpand">
 
-        <Grid ColumnSpacing="5"
-              RowSpacing="5"
-              Padding="10"
-              HorizontalOptions="Center">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="40"/>
-                <ColumnDefinition Width="40"/>
-                <ColumnDefinition Width="40"/>
-                <ColumnDefinition Width="40"/>
-                <ColumnDefinition Width="40"/>
-                <ColumnDefinition Width="40"/>
-                <ColumnDefinition Width="40"/>
-            </Grid.ColumnDefinitions>
+        <Grid Grid.Row="0" ColumnDefinitions="*,*">
+            <Image Source="home_icon.png"
+                   Grid.Column="0"
+                   HeightRequest="50"
+                   Aspect="AspectFit"
+                   HorizontalOptions="Start"
+                   VerticalOptions="Center"
+                   Margin="20,10"/>
 
-            <Button Grid.Column="0"
-                    BackgroundColor="Red"
-                    Clicked="OnColorButtonClicked"/>
-
-            <Button Grid.Column="1"
-                    BackgroundColor="Orange"
-                    Clicked="OnColorButtonClicked"/>
-
-            <Button Grid.Column="2"
-                    BackgroundColor="Yellow"
-                    Clicked="OnColorButtonClicked"/>
-
-            <Button Grid.Column="3"
-                    BackgroundColor="Green"
-                    Clicked="OnColorButtonClicked"/>
-
-            <Button Grid.Column="4"
-                    BackgroundColor="LightBlue"
-                    Clicked="OnColorButtonClicked"/>
-
-            <Button Grid.Column="5"
-                    BackgroundColor="Blue"
-                    Clicked="OnColorButtonClicked"/>
-
-            <Button Grid.Column="6"
-                    BackgroundColor="Purple"
-                    Clicked="OnColorButtonClicked"/>
+            <Button x:Name="MenuButton"
+                    Grid.Column="1"
+                    BackgroundColor="#474747"
+                    Text="☰"
+                    Clicked="OnMenuButtonClicked"
+                    HorizontalOptions="End"
+                    VerticalOptions="Center"
+                    Margin="0,0,20,0"/>
         </Grid>
 
-        <Grid ColumnSpacing="5"
-              RowSpacing="5"
-              Padding="10"
-              HorizontalOptions="Center">
+        <Grid Grid.Row="1" HorizontalOptions="Center" VerticalOptions="Center">
+            <GraphicsView x:Name="MatrixCanvas"
+                          HeightRequest="320"
+                          WidthRequest="320"
+                          BackgroundColor="Black">
+                <GraphicsView.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnCanvasTapped" />
+                    <PanGestureRecognizer PanUpdated="OnCanvasPanUpdated" />
+                </GraphicsView.GestureRecognizers>
+            </GraphicsView>
+        </Grid>
+
+        <Grid Grid.Row="2" ColumnSpacing="5" RowSpacing="5" Padding="10" HorizontalOptions="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="40"/>
                 <ColumnDefinition Width="40"/>
@@ -74,21 +51,48 @@
                 <ColumnDefinition Width="40"/>
             </Grid.ColumnDefinitions>
 
+            <Button Grid.Column="0" BackgroundColor="Red" Clicked="OnColorButtonClicked"/>
+            <Button Grid.Column="1" BackgroundColor="Orange" Clicked="OnColorButtonClicked"/>
+            <Button Grid.Column="2" BackgroundColor="Yellow" Clicked="OnColorButtonClicked"/>
+            <Button Grid.Column="3" BackgroundColor="Green" Clicked="OnColorButtonClicked"/>
+            <Button Grid.Column="4" BackgroundColor="LightBlue" Clicked="OnColorButtonClicked"/>
+            <Button Grid.Column="5" BackgroundColor="Blue" Clicked="OnColorButtonClicked"/>
+            <Button Grid.Column="6" BackgroundColor="Purple" Clicked="OnColorButtonClicked"/>
+        </Grid>
+
+
+        <Grid Grid.Row="3" ColumnSpacing="5" RowSpacing="5" Padding="10" HorizontalOptions="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="40"/>
+            </Grid.ColumnDefinitions>
+
             <Button Grid.Column="0"
-                    ImageSource="fill_icon.png"  
+                    ImageSource="fill_icon.png"
                     Background="White"
-                    />
-            
-            <Button Grid.Column="1  "
-                    ImageSource="clear_icon.png"  
+                    Clicked="FillCanvas"/>
+
+            <Button Grid.Column="1"
+                    ImageSource="clear_icon.png"
                     Background="White"
                     Clicked="ClearCanvas"/>
         </Grid>
 
-        <Label x:Name="ConnectionStatus"
-               Text="Disconnected"
-               TextColor="Red"
+        <Frame x:Name="DropdownMenu"
+               Grid.Row="0" Grid.RowSpan="4" Grid.Column="0"
+               IsVisible="False"
+               BackgroundColor="#333333"
+               CornerRadius="10"
+               Padding="10"
+               Margin="0,50,20,0"
+               ZIndex="999"
                HorizontalOptions="End"
-               Margin="10"/>
-    </VerticalStackLayout>
+               VerticalOptions="Start">
+            <VerticalStackLayout>
+                <Button Text="Test connection" Clicked="OnMenuItemClicked"/>
+                <Button Text="Matrix" Clicked="OnMenuItemClicked"/>
+                <Button Text="Strip" Clicked="OnMenuItemClicked"/>
+            </VerticalStackLayout>
+        </Frame>
+    </Grid>
 </ContentPage>
