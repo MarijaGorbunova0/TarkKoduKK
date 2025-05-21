@@ -107,6 +107,8 @@ namespace TarkKoduKK
                 "Test connection" => new MainPage(),
                 "Matrix" => new MatrixPage(),
                 "Strip" => new StripPage(),
+                "User" => new UserPage(),
+                "Login" => new LoginPage(),
                 _ => null
             };
 
