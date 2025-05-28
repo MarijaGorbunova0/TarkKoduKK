@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="TarkKoduKK.StripPage">
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*" ColumnDefinitions="*,*">
+        <Image Source="home_icon.png"
+           Grid.Row="0" Grid.Column="0"    
+           HeightRequest="50"
+           Aspect="AspectFit"
+           HorizontalOptions="Start"
+           VerticalOptions="Start" 
+           Margin=" 20, 0" 
+           WidthRequest="40"
+               />
+        <Frame CornerRadius="20"       
+                Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                BackgroundColor="#dc70e5"
+                Padding="15"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                WidthRequest="110"
+                HeightRequest="51"
+               >
+                
+            <Label Text="Led Riba"
+               TextColor="White"
+               FontSize="18"
+               FontAttributes="Bold"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"/>
+        </Frame>
+        <Button x:Name="MenuButton"
+            Grid.Row="0" Grid.Column="1"
+            BackgroundColor="#474747"
+            Text="☰"
+                WidthRequest="70"
+            Clicked="OnMenuButtonClicked"
+            HorizontalOptions="End"
+            VerticalOptions="Center"
+            Margin="0,0,20,0"/>
+        <Frame x:Name="DropdownMenu"
+               Grid.Row="0" Grid.RowSpan="4" Grid.Column="1"
+               IsVisible="False"
+               BackgroundColor="#333333"
+               CornerRadius="10"
+               Padding="10"
+               Margin="0,50,20,0"
+               ZIndex="999"
+               HorizontalOptions="End"
+               VerticalOptions="Start">
+            <VerticalStackLayout>
+                <Button Text="Test connection" Clicked="OnMenuItemClicked"/>
+                <Button Text="Matrix" Clicked="OnMenuItemClicked"/>
+                <Button Text="Strip" Clicked="OnMenuItemClicked"/>
+            </VerticalStackLayout>
+        </Frame>
+
+        <VerticalStackLayout 
+            Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"             
+            HorizontalOptions="Center"
+            VerticalOptions="Center"
+            Spacing="10">
+                
+            <Ellipse x:Name="ColorCircle"
+                 WidthRequest="150"
+                 HeightRequest="150"
+                 Fill="White"
+                 Stroke="#474747"
+                 StrokeThickness="30"
+                 HorizontalOptions="Center"
+                 VerticalOptions="Center"/>
+            <Image Source="led_strip_img.png" 
+               HeightRequest="90"
+               WidthRequest="300"/>
+
+            <Frame CornerRadius="20"
+                   BackgroundColor="#474747"
+                   BorderColor="#5E5E5E"
+                   Padding="15"
+                   HasShadow="False"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center">
+
+                <Grid ColumnSpacing="10"
+                      RowSpacing="10"
+                      WidthRequest="260"
+                      HeightRequest="260">
+                    
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="80"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="80"/>
+                        <RowDefinition Height="80"/>
+                        <RowDefinition Height="80"/>
+                    </Grid.RowDefinitions>
+
+                    <Button Grid.Row="0" Grid.Column="0" 
+                            BackgroundColor="Red"
+                            CornerRadius="10"
+                            Clicked="OnColorButtonClicked"/>    
+
+                    <Button Grid.Row="0" Grid.Column="1" 
+                            BackgroundColor="Orange"
+                            CornerRadius="10"
+                            Clicked="OnColorButtonClicked"/>
+
+                    <Button Grid.Row="0" Grid.Column="2" 
+                            BackgroundColor="Yellow"
+                            CornerRadius="10"
+                            Clicked="OnColorButtonClicked"/>
+
+                    <Button Grid.Row="1" Grid.Column="0" 
+                            BackgroundColor="#85d966"
+                            CornerRadius="10"
+                            Clicked="OnColorButtonClicked"/>
+
+                    <Button Grid.Row="1" Grid.Column="1" 
+                            BackgroundColor="LightBlue"
+                            CornerRadius="10"
+                            Clicked="OnColorButtonClicked"/>
+
+                    <Button Grid.Row="1" Grid.Column="2" 
+                            BackgroundColor="#666ad9"
+                            CornerRadius="10"
+                            Clicked="OnColorButtonClicked"/>
+                    
+                    <Button Grid.Row="2" Grid.Column="0" 
+                            BackgroundColor="#d486f0"
+                            CornerRadius="10"
+                            Clicked="OnColorButtonClicked"/>
+
+                    <Button Grid.Row="2" Grid.Column="1" 
+                            BackgroundColor="White"
+                            CornerRadius="10"
+                            Clicked="OnColorButtonClicked"/>
+
+                    <Button Grid.Row="2" Grid.Column="2" 
+                            BackgroundColor="Black"
+                            Text="OFF"
+                            TextColor="White"
+                            CornerRadius="10"
+                            Clicked="OnColorButtonClicked"/>
+                </Grid>
+            </Frame>
+        </VerticalStackLayout>
+    </Grid>
+
+</ContentPage>
