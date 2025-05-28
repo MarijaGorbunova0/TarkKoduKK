@@ -50,14 +50,24 @@
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
 	<ItemGroup>
+	  <Compile Update="Pages\RegistrPage.xaml.cs">
+	    <DependentUpon>RegistrPage.xaml</DependentUpon>
+	  </Compile>
 	  <Compile Update="Pages\StripPage.xaml.cs">
 	    <DependentUpon>StripPage.xaml</DependentUpon>
 	  </Compile>
 	</ItemGroup>
 	<ItemGroup>
+	  <MauiXaml Update="Pages\RegistrPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Pages\StripPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>
-
+	<ItemGroup>
+		<MauiXaml Update="Pages\LoginPage.xaml.cs">
+			<Generator>LoginPage.xaml</Generator>
+		</MauiXaml>
+	</ItemGroup>
 </Project>
