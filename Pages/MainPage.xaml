@@ -66,6 +66,7 @@
                 <Button Text="Strip" Clicked="OnMenuItemClicked"/>
                 <Button Text="User" Clicked="OnMenuItemClicked"/>
                 <Button Text="Login" Clicked="OnMenuItemClicked"/>
+                <Button Text="Registr" Clicked="OnMenuItemClicked"/>
             </VerticalStackLayout>
         </Frame>
     </Grid>
