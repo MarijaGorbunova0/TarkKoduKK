@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
-using System.Security.Cryptography;
 using System.Text;
+using TarkKoduKK.Data; 
 
 namespace TarkKoduKK
 {
@@ -13,13 +13,16 @@ namespace TarkKoduKK
             InitializeComponent();
         }
 
-        private async void OnLoginClicked(object sender, EventArgs e)
+        private async void LoginClicked(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(UsernameEntry.Text) || string.IsNullOrWhiteSpace(PasswordEntry.Text))
+            if (string.IsNullOrWhiteSpace(UserIdEntry.Text) || string.IsNullOrWhiteSpace(PasswordEntry.Text))
             {
-                await DisplayAlert("Ошибка", "Введите логин и пароль", "OK");
+                await DisplayAlert("Viga", "sisesta ID ja parool", "OK");
                 return;
             }
+
+            string sisestatudId = UserIdEntry.Text.Trim();
+            string sisestatudParool = PasswordEntry.Text;
 
             try
             {
@@ -30,32 +33,31 @@ namespace TarkKoduKK
                 var json = await response.Content.ReadAsStringAsync();
                 var users = JsonConvert.DeserializeObject<Dictionary<string, User>>(json);
 
-                string enteredLogin = UsernameEntry.Text.Trim();
-                string enteredPassword = PasswordEntry.Text;
-
-                var userExists = users?.Any(u =>
-                    u.Value.UserName == enteredLogin &&
-                    u.Value.UserPassword == enteredPassword) ?? false;
-
-                if (userExists)
+                if (users != null && users.TryGetValue(sisestatudId, out var kasutaja))
                 {
-                    await DisplayAlert("Успех", "Авторизация прошла успешно!", "OK");
+                    if (kasutaja.UserPassword == sisestatudParool)
+                    {
+                        await DisplayAlert("Edu", $"Sisse logitud! Tere tulemast, {kasutaja.UserName}", "OK");
+                    }
+                    else
+                    {
+                        await DisplayAlert("viga", "Vale parool", "OK");
+                    }
                 }
                 else
                 {
-                    await DisplayAlert("Ошибка", "Неверный логин или пароль", "OK");
+                    await DisplayAlert("Viga", "Kasutajat selle ID-ga ei leitud.", "OK");
                 }
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Ошибка", $"Ошибка подключения: {ex.Message}", "OK");
+                await DisplayAlert("Viga", $"Ühenduse viga {ex.Message}", "OK");
             }
         }
-
-        private class User
+        private async void RegisterClicked(object sender, EventArgs e)
         {
-            public string UserName { get; set; }
-            public string UserPassword { get; set; }
+            await Navigation.PushAsync(new RegistrPage());
         }
+
     }
 }

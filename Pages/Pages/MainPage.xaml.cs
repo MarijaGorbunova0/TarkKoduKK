@@ -109,6 +109,7 @@ namespace TarkKoduKK
                 "Strip" => new StripPage(),
                 "User" => new UserPage(),
                 "Login" => new LoginPage(),
+                "Registr" => new RegistrPage(),
                 _ => null
             };
 
