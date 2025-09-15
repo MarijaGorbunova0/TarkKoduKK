@@ -1,0 +1,2 @@
+The smart home system is my study project, the goal of which was to create a simple and convenient application for controlling devices directly from a smartphone.
+I developed the app in C# MAUI, which allows it to be used on different platforms. ESP32 microcontrollers with Wi-Fi support were used to simulate the operation of a smart home. Data exchange between the app and devices is implemented via an MQTT broker, which ensures fast and reliable information transfer
